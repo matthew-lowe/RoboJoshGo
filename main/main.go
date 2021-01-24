@@ -124,4 +124,5 @@ func registerCommands() {
 	CmdRegistry.Register("ping", "Test if the bot is working", commands.PingCommand)
 	CmdRegistry.Register("help", "View a list of commands", commands.HelpCommand)
 	CmdRegistry.Register("color", "Generate a solid image color", commands.ColorCommand)
+	CmdRegistry.Register("8ball", "Magic 8 ball!", commands.EightBallCommand)
 }
