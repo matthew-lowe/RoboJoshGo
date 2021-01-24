@@ -5,7 +5,7 @@ import (
 	"github.com/matthewlowe/Robojosh/framework"
 )
 
-func HelpCommand(context *framework.Context) {
+func HelpCommand(context *framework.Context) error {
 	commandMap := *context.CmdRegistry.GetCommandMap()
 
 	names := make([]string, len(commandMap))
@@ -30,7 +30,7 @@ func HelpCommand(context *framework.Context) {
 
 	footer := discordgo.MessageEmbedFooter{
 		Text:    "brought to you by your local electronic nugget lover",
-		IconURL: context.Discord.State.User.AvatarURL("256x256"),
+		IconURL: context.Session.State.User.AvatarURL("256x256"),
 	}
 
 	embed := discordgo.MessageEmbed{
@@ -43,5 +43,7 @@ func HelpCommand(context *framework.Context) {
 		Fields: fields,
 	}
 
-	context.Discord.ChannelMessageSendEmbed(context.TextChannel.ID, &embed)
+	_, err := context.Session.ChannelMessageSendEmbed(context.TextChannel.ID, &embed)
+
+	return err
 }

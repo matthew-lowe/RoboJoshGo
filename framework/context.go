@@ -5,7 +5,7 @@ import (
 )
 
 type Context struct {
-	Discord     *discordgo.Session
+	Session     *discordgo.Session
 	User        *discordgo.User
 	TextChannel *discordgo.Channel
 	Guild       *discordgo.Guild

@@ -15,8 +15,7 @@ import (
 )
 
 var (
-	Token      string
-	CmdHandler *framework.CommandRegistry
+	CmdRegistry *framework.CommandRegistry
 )
 
 const (
@@ -52,7 +51,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	CmdHandler = framework.NewCommandHandler()
+	CmdRegistry = framework.NewCommandHandler()
 	registerCommands()
 
 	dg.AddHandler(messageCreate)
@@ -68,7 +67,7 @@ func main() {
 	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)
 	<-sc
 
-	dg.Close()
+	_ = dg.Close() // We literally do not care if there's an error here, the program is closing anyway
 }
 
 func messageCreate(session *discordgo.Session, message *discordgo.MessageCreate) {
@@ -97,28 +96,32 @@ func messageCreate(session *discordgo.Session, message *discordgo.MessageCreate)
 	}
 
 	context := framework.Context{
-		Discord:     session,
+		Session:     session,
 		User:        user,
 		TextChannel: channel,
 		Guild:       guild,
 		Message:     message.Message,
 		Args:        args,
-		CmdRegistry: CmdHandler,
+		CmdRegistry: CmdRegistry,
 		Prefix:      Prefix,
 	}
 
-	command, found := CmdHandler.Get(name)
+	command, found := CmdRegistry.Get(name)
 
 	if !found {
 		return
 	}
 
 	c := *command
-	c(&context)
+	err = c(&context)
+
+	if err != nil {
+		log.Println(err)
+	}
 }
 
 func registerCommands() {
-	CmdHandler.Register("ping", "Test if the bot is working", commands.PingCommand)
-	CmdHandler.Register("help", "View a list of commands", commands.HelpCommand)
-	CmdHandler.Register("color", "Generate a solid image color", commands.ColorCommand)
+	CmdRegistry.Register("ping", "Test if the bot is working", commands.PingCommand)
+	CmdRegistry.Register("help", "View a list of commands", commands.HelpCommand)
+	CmdRegistry.Register("color", "Generate a solid image color", commands.ColorCommand)
 }

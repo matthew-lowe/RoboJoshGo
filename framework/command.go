@@ -1,7 +1,7 @@
 package framework
 
 type (
-	Command func(ctx *Context)
+	Command func(ctx *Context) error
 
 	CommandStruct struct {
 		Command Command

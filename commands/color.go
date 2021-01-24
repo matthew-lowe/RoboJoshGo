@@ -12,7 +12,7 @@ const (
 	height  string = "500"
 )
 
-func ColorCommand(context *framework.Context) {
+func ColorCommand(context *framework.Context) error {
 	fmt.Println("nice")
 	code := context.Args[1]
 
@@ -26,7 +26,7 @@ func ColorCommand(context *framework.Context) {
 
 	footer := discordgo.MessageEmbedFooter{
 		Text:    "brought to you by your local electronic nugget lover",
-		IconURL: context.Discord.State.User.AvatarURL("256x256"),
+		IconURL: context.Session.State.User.AvatarURL("256x256"),
 	}
 
 	embed := discordgo.MessageEmbed{
@@ -39,5 +39,7 @@ func ColorCommand(context *framework.Context) {
 		Footer:      &footer,
 	}
 
-	context.Discord.ChannelMessageSendEmbed(context.TextChannel.ID, &embed)
+	_, err := context.Session.ChannelMessageSendEmbed(context.TextChannel.ID, &embed)
+
+	return err
 }
