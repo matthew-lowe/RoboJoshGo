@@ -54,7 +54,7 @@ func main() {
 	CmdRegistry = framework.NewCommandHandler()
 	registerCommands()
 
-	dg.AddHandler(messageCreate)
+	dg.AddHandler(runMessageCreate)
 	dg.Identify.Intents = discordgo.IntentsGuildMessages
 
 	err = dg.Open()
@@ -70,7 +70,16 @@ func main() {
 	_ = dg.Close() // We literally do not care if there's an error here, the program is closing anyway
 }
 
-func messageCreate(session *discordgo.Session, message *discordgo.MessageCreate) {
+func runMessageCreate(session *discordgo.Session, message *discordgo.MessageCreate) {
+	c := make(chan error)
+	go messageCreate(session, message, c)
+
+	for _ = range c {
+		<-c
+	}
+}
+
+func messageCreate(session *discordgo.Session, message *discordgo.MessageCreate, c chan error) {
 	switch {
 	case message.Author.ID == session.State.User.ID:
 		return
@@ -87,11 +96,15 @@ func messageCreate(session *discordgo.Session, message *discordgo.MessageCreate)
 
 	channel, err := session.Channel(message.ChannelID)
 	if err != nil {
+		c <- err
+		close(c)
 		return
 	}
 
 	guild, err := session.Guild(message.GuildID)
 	if err != nil {
+		c <- err
+		close(c)
 		return
 	}
 
@@ -109,15 +122,18 @@ func messageCreate(session *discordgo.Session, message *discordgo.MessageCreate)
 	command, found := CmdRegistry.Get(name)
 
 	if !found {
+		close(c)
 		return
 	}
 
-	c := *command
-	err = c(&context)
+	cmd := *command
+	err = cmd(&context)
 
 	if err != nil {
 		log.Println(err)
 	}
+
+	close(c)
 }
 
 func registerCommands() {
