@@ -125,4 +125,5 @@ func registerCommands() {
 	CmdRegistry.Register("help", "View a list of commands", commands.HelpCommand)
 	CmdRegistry.Register("color", "Generate a solid image color", commands.ColorCommand)
 	CmdRegistry.Register("8ball", "Magic 8 ball!", commands.EightBallCommand)
+	CmdRegistry.Register("info", "Get user info", commands.InfoCommand)
 }
