@@ -19,16 +19,18 @@ func InfoCommand(context *framework.Context) error {
 	user, err := context.Session.User(framework.TagToUserId(context.Args[1]))
 
 	if err != nil {
-		context.Session.ChannelMessageSend(context.TextChannel.ID, "Invalid user, dufus!")
+		_, err = context.Session.ChannelMessageSend(context.TextChannel.ID, "Invalid user, dufus!")
+
+		return err
 	}
 
 	fields := []*discordgo.MessageEmbedField{
-		&discordgo.MessageEmbedField{
+		{
 			Name:   "ID",
 			Value:  user.ID,
 			Inline: true,
 		},
-		&discordgo.MessageEmbedField{
+		{
 			Name:   "Nickname",
 			Value:  user.Username,
 			Inline: true,

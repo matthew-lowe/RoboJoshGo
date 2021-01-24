@@ -121,9 +121,9 @@ func messageCreate(session *discordgo.Session, message *discordgo.MessageCreate)
 }
 
 func registerCommands() {
-	CmdRegistry.Register("ping", "Test if the bot is working", commands.PingCommand)
-	CmdRegistry.Register("help", "View a list of commands", commands.HelpCommand)
-	CmdRegistry.Register("color", "Generate a solid image color", commands.ColorCommand)
-	CmdRegistry.Register("8ball", "Magic 8 ball!", commands.EightBallCommand)
-	CmdRegistry.Register("info", "Get user info", commands.InfoCommand)
+	CmdRegistry.Register("ping", "Test if the bot is working", Prefix+"%ing", commands.PingCommand)
+	CmdRegistry.Register("help", "View a list of commands", Prefix+"help", commands.HelpCommand)
+	CmdRegistry.Register("color", "Generate a solid image color", Prefix+"color <hex code>", commands.ColorCommand)
+	CmdRegistry.Register("8ball", "Magic 8 ball!", Prefix+"ball <question>", commands.EightBallCommand)
+	CmdRegistry.Register("info", "Get user info", Prefix+"info <user>", commands.InfoCommand)
 }

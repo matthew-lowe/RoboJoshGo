@@ -6,6 +6,7 @@ type (
 	CommandStruct struct {
 		Command Command
 		Help    string
+		Usage   string
 	}
 
 	CommandMap map[string]CommandStruct
@@ -15,10 +16,11 @@ type (
 	}
 )
 
-func (handler *CommandRegistry) Register(name, helpMsg string, command Command) {
+func (handler *CommandRegistry) Register(name, help, usage string, command Command) {
 	commandStruct := CommandStruct{
 		Command: command,
-		Help:    helpMsg,
+		Help:    help,
+		Usage:   usage,
 	}
 
 	handler.commands[name] = commandStruct
