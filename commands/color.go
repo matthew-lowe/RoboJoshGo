@@ -1,0 +1,43 @@
+package commands
+
+import (
+	"fmt"
+	"github.com/bwmarrin/discordgo"
+	"github.com/matthewlowe/Robojosh/framework"
+)
+
+const (
+	baseUrl string = "https://singlecolorimage.com/get/"
+	width   string = "500"
+	height  string = "500"
+)
+
+func ColorCommand(context *framework.Context) {
+	fmt.Println("nice")
+	code := context.Args[1]
+
+	url := baseUrl + code + "/" + width + "x" + height
+
+	image := discordgo.MessageEmbedImage{
+		URL:    url,
+		Width:  500,
+		Height: 500,
+	}
+
+	footer := discordgo.MessageEmbedFooter{
+		Text:    "brought to you by your local electronic nugget lover",
+		IconURL: context.Discord.State.User.AvatarURL("256x256"),
+	}
+
+	embed := discordgo.MessageEmbed{
+		URL:         url,
+		Type:        "image",
+		Title:       "#" + code,
+		Description: "Requested by " + context.User.Username + "#" + context.User.Discriminator,
+		Image:       &image,
+		Color:       10038562, // DARKER_RED
+		Footer:      &footer,
+	}
+
+	context.Discord.ChannelMessageSendEmbed(context.TextChannel.ID, &embed)
+}
