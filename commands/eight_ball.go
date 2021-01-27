@@ -1,7 +1,7 @@
 package commands
 
 import (
-	"github.com/matthewlowe/Robojosh/framework"
+	"github.com/matthewlowe/RoboJoshGo/framework"
 	"math/rand"
 )
 
@@ -23,11 +23,7 @@ func getRandomResponse() string {
 }
 
 func EightBallCommand(context *framework.Context) error {
-	_, err := context.Session.ChannelMessageSend(
-		context.TextChannel.ID,
-		"<@"+context.User.ID+"> "+
-			getRandomResponse(),
-	)
+	_, err := context.Reply(getRandomResponse())
 
 	return err
 }

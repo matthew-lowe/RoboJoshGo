@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
-	"github.com/matthewlowe/Robojosh/commands"
-	"github.com/matthewlowe/Robojosh/framework"
+	"github.com/matthewlowe/RoboJoshGo/commands"
+	"github.com/matthewlowe/RoboJoshGo/framework"
 	"io/ioutil"
 	"log"
 	"os"
@@ -15,7 +15,9 @@ import (
 )
 
 var (
-	CmdRegistry *framework.CommandRegistry
+	CmdRegistry     *framework.CommandRegistry
+	DeletionHistory *framework.History
+	MessageHistory  *framework.History
 )
 
 const (
@@ -52,9 +54,14 @@ func main() {
 	}
 
 	CmdRegistry = framework.NewCommandHandler()
+	MessageHistory = framework.NewHistory()
+	DeletionHistory = framework.NewHistory()
+
 	registerCommands()
 
 	dg.AddHandler(messageCreate)
+	dg.AddHandler(messageDelete)
+
 	dg.Identify.Intents = discordgo.IntentsGuildMessages
 
 	err = dg.Open()
@@ -70,40 +77,49 @@ func main() {
 	_ = dg.Close() // We literally do not care if there's an error here, the program is closing anyway
 }
 
-func messageCreate(session *discordgo.Session, message *discordgo.MessageCreate) {
+func messageDelete(session *discordgo.Session, event *discordgo.MessageDelete) {
+	DeletionHistory.AddMessage(MessageHistory.GetMessage(event.Message.ID))
+}
+
+func messageCreate(session *discordgo.Session, event *discordgo.MessageCreate) {
+	MessageHistory.AddMessage(event.Message)
+
 	switch {
-	case message.Author.ID == session.State.User.ID:
+	case event.Author.ID == session.State.User.ID:
 		return
-	case len(message.Content) < 2:
+	case len(event.Content) < 2:
 		return
-	case message.Content[:len(Prefix)] != Prefix:
+	case event.Content[:len(Prefix)] != Prefix:
 		return
 	}
 
-	args := strings.Fields(message.Content[len(Prefix):])
+	args := strings.Fields(event.Content[len(Prefix):])
 	name := args[0]
 
-	user := message.Author
+	user := event.Author
 
-	channel, err := session.Channel(message.ChannelID)
+	channel, err := session.Channel(event.ChannelID)
 	if err != nil {
 		return
 	}
 
-	guild, err := session.Guild(message.GuildID)
+	guild, err := session.Guild(event.GuildID)
 	if err != nil {
 		return
 	}
 
 	context := framework.Context{
-		Session:     session,
-		User:        user,
-		TextChannel: channel,
-		Guild:       guild,
-		Message:     message.Message,
-		Args:        args,
-		CmdRegistry: CmdRegistry,
-		Prefix:      Prefix,
+		Session: session,
+		User:    user,
+		Channel: channel,
+		Guild:   guild,
+		Message: event.Message,
+		Args:    args,
+		Prefix:  Prefix,
+
+		CmdRegistry:     CmdRegistry,
+		MessageHistory:  MessageHistory,
+		DeletionHistory: DeletionHistory,
 	}
 
 	command, found := CmdRegistry.Get(name)
@@ -126,4 +142,5 @@ func registerCommands() {
 	CmdRegistry.Register("color", "Generate a solid image color", Prefix+"color <hex code>", commands.ColorCommand)
 	CmdRegistry.Register("8ball", "Magic 8 ball!", Prefix+"ball <question>", commands.EightBallCommand)
 	CmdRegistry.Register("info", "Get user info", Prefix+"info <user>", commands.InfoCommand)
+	CmdRegistry.Register("snipe", "View deleted messages", Prefix+"snipe [index]", commands.SnipeCommand)
 }

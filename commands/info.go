@@ -2,24 +2,24 @@ package commands
 
 import (
 	"github.com/bwmarrin/discordgo"
-	"github.com/matthewlowe/Robojosh/framework"
+	"github.com/matthewlowe/RoboJoshGo/framework"
 )
 
 func InfoCommand(context *framework.Context) error {
 	if len(context.Args) <= 1 {
-		_, err := context.Session.ChannelMessageSend(context.TextChannel.ID, "Usage: "+context.Prefix+"info @<user>")
+		_, err := context.Session.ChannelMessageSend(context.Channel.ID, "Usage: "+context.Prefix+"info @<user>")
 		return err
 	}
 
 	if context.Args[1][:2] != "<@" || context.Args[1][len(context.Args[1])-1:] != ">" {
-		_, err := context.Session.ChannelMessageSend(context.TextChannel.ID, "Usage: "+context.Prefix+"info @<user>")
+		_, err := context.Session.ChannelMessageSend(context.Channel.ID, "Usage: "+context.Prefix+"info @<user>")
 		return err
 	}
 
 	user, err := context.Session.User(framework.TagToUserId(context.Args[1]))
 
 	if err != nil {
-		_, err = context.Session.ChannelMessageSend(context.TextChannel.ID, "Invalid user, dufus!")
+		_, err = context.Session.ChannelMessageSend(context.Channel.ID, "Invalid user, dufus!")
 
 		return err
 	}
@@ -56,7 +56,7 @@ func InfoCommand(context *framework.Context) error {
 		Fields: fields,
 	}
 
-	_, err = context.Session.ChannelMessageSendEmbed(context.TextChannel.ID, &embed)
+	_, err = context.Session.ChannelMessageSendEmbed(context.Channel.ID, &embed)
 
 	return err
 }

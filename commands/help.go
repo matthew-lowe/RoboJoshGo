@@ -2,7 +2,7 @@ package commands
 
 import (
 	"github.com/bwmarrin/discordgo"
-	"github.com/matthewlowe/Robojosh/framework"
+	"github.com/matthewlowe/RoboJoshGo/framework"
 )
 
 func HelpCommand(context *framework.Context) error {
@@ -45,7 +45,7 @@ func HelpCommand(context *framework.Context) error {
 		Fields: fields,
 	}
 
-	_, err := context.Session.ChannelMessageSendEmbed(context.TextChannel.ID, &embed)
+	_, err := context.Session.ChannelMessageSendEmbed(context.Channel.ID, &embed)
 
 	return err
 }

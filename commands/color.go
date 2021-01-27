@@ -3,7 +3,7 @@ package commands
 import (
 	"fmt"
 	"github.com/bwmarrin/discordgo"
-	"github.com/matthewlowe/Robojosh/framework"
+	"github.com/matthewlowe/RoboJoshGo/framework"
 )
 
 const (
@@ -39,7 +39,7 @@ func ColorCommand(context *framework.Context) error {
 		Footer:      &footer,
 	}
 
-	_, err := context.Session.ChannelMessageSendEmbed(context.TextChannel.ID, &embed)
+	_, err := context.Session.ChannelMessageSendEmbed(context.Channel.ID, &embed)
 
 	return err
 }
