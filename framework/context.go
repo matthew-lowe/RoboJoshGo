@@ -13,9 +13,7 @@ type Context struct {
 	Args    []string
 	Prefix  string
 
-	CmdRegistry     *CommandRegistry
-	MessageHistory  *History
-	DeletionHistory *History
+	CmdRegistry *CommandRegistry
 }
 
 func (context *Context) Reply(message string) (*discordgo.Message, error) {

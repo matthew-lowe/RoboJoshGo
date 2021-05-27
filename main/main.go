@@ -2,8 +2,6 @@ package main
 
 import (
 	"fmt"
-	"github.com/matthewlowe/RoboJoshGo/commands"
-	"github.com/matthewlowe/RoboJoshGo/framework"
 	"io/ioutil"
 	"log"
 	"os"
@@ -11,13 +9,14 @@ import (
 	"strings"
 	"syscall"
 
+	"github.com/matthewlowe/RoboJoshGo/commands"
+	"github.com/matthewlowe/RoboJoshGo/framework"
+
 	"github.com/bwmarrin/discordgo"
 )
 
 var (
-	CmdRegistry     *framework.CommandRegistry
-	DeletionHistory *framework.History
-	MessageHistory  *framework.History
+	CmdRegistry *framework.CommandRegistry
 )
 
 const (
@@ -54,13 +53,10 @@ func main() {
 	}
 
 	CmdRegistry = framework.NewCommandHandler()
-	MessageHistory = framework.NewHistory()
-	DeletionHistory = framework.NewHistory()
 
 	registerCommands()
 
 	dg.AddHandler(messageCreate)
-	dg.AddHandler(messageDelete)
 
 	dg.Identify.Intents = discordgo.IntentsGuildMessages
 
@@ -77,13 +73,7 @@ func main() {
 	_ = dg.Close() // We literally do not care if there's an error here, the program is closing anyway
 }
 
-func messageDelete(session *discordgo.Session, event *discordgo.MessageDelete) {
-	DeletionHistory.AddMessage(MessageHistory.GetMessage(event.Message.ID))
-}
-
 func messageCreate(session *discordgo.Session, event *discordgo.MessageCreate) {
-	MessageHistory.AddMessage(event.Message)
-
 	switch {
 	case event.Author.ID == session.State.User.ID:
 		return
@@ -117,9 +107,7 @@ func messageCreate(session *discordgo.Session, event *discordgo.MessageCreate) {
 		Args:    args,
 		Prefix:  Prefix,
 
-		CmdRegistry:     CmdRegistry,
-		MessageHistory:  MessageHistory,
-		DeletionHistory: DeletionHistory,
+		CmdRegistry: CmdRegistry,
 	}
 
 	command, found := CmdRegistry.Get(name)
@@ -137,10 +125,9 @@ func messageCreate(session *discordgo.Session, event *discordgo.MessageCreate) {
 }
 
 func registerCommands() {
-	CmdRegistry.Register("ping", "Test if the bot is working", Prefix+"%ing", commands.PingCommand)
+	CmdRegistry.Register("ping", "Test if the bot is working", Prefix+"ping", commands.PingCommand)
 	CmdRegistry.Register("help", "View a list of commands", Prefix+"help", commands.HelpCommand)
 	CmdRegistry.Register("color", "Generate a solid image color", Prefix+"color <hex code>", commands.ColorCommand)
 	CmdRegistry.Register("8ball", "Magic 8 ball!", Prefix+"ball <question>", commands.EightBallCommand)
 	CmdRegistry.Register("info", "Get user info", Prefix+"info <user>", commands.InfoCommand)
-	CmdRegistry.Register("snipe", "View deleted messages", Prefix+"snipe [index]", commands.SnipeCommand)
 }
