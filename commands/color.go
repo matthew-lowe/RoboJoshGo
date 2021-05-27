@@ -1,7 +1,6 @@
 package commands
 
 import (
-	"fmt"
 	"github.com/bwmarrin/discordgo"
 	"github.com/matthewlowe/RoboJoshGo/framework"
 )
@@ -13,8 +12,41 @@ const (
 )
 
 func ColorCommand(context *framework.Context) error {
-	fmt.Println("nice")
 	code := context.Args[1]
+
+	valid, err := framework.VerifyHexColor(code)
+
+	if err != nil {
+		return err
+	}
+
+	if !valid {
+		footer := discordgo.MessageEmbedFooter{
+			Text:    "brought to you by your local electronic nugger lover",
+			IconURL: context.Session.State.User.AvatarURL("256x256"),
+		}
+
+		field := discordgo.MessageEmbedField{
+			Name:  "You fucking idiot",
+			Value: "Invalid color code provided! Must be in form #<code> where <code> is 6 hexadecimal digits",
+		}
+
+		embed := discordgo.MessageEmbed{
+			Type:   discordgo.EmbedType("rich"),
+			Title:  "Invalid hex code!",
+			Color:  10038562, // DARKER_RED
+			Fields: []*discordgo.MessageEmbedField{&field},
+			Footer: &footer,
+		}
+
+		_, err := context.Session.ChannelMessageSendEmbed(context.Channel.ID, &embed)
+
+		return err
+	}
+
+	if code[0] == '#' {
+		code = code[1:]
+	}
 
 	url := baseUrl + code + "/" + width + "x" + height
 
@@ -39,7 +71,7 @@ func ColorCommand(context *framework.Context) error {
 		Footer:      &footer,
 	}
 
-	_, err := context.Session.ChannelMessageSendEmbed(context.Channel.ID, &embed)
+	_, err = context.Session.ChannelMessageSendEmbed(context.Channel.ID, &embed)
 
 	return err
 }
