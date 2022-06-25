@@ -1,22 +1,16 @@
 package commands
 
 import (
+	"fmt"
+
 	"github.com/bwmarrin/discordgo"
-	"github.com/matthewlowe/RoboJoshGo/framework"
+	"github.com/matthew-lowe/RoboJoshGo/framework"
 )
 
 func InfoCommand(context *framework.Context) error {
-	if len(context.Args) <= 1 {
-		_, err := context.Session.ChannelMessageSend(context.Channel.ID, "Usage: "+context.Prefix+"info @<user>")
-		return err
-	}
+	userId := fmt.Sprintf("%s", context.Interaction.ApplicationCommandData().Options[0].Value)
 
-	if context.Args[1][:2] != "<@" || context.Args[1][len(context.Args[1])-1:] != ">" {
-		_, err := context.Session.ChannelMessageSend(context.Channel.ID, "Usage: "+context.Prefix+"info @<user>")
-		return err
-	}
-
-	user, err := context.Session.User(framework.TagToUserId(context.Args[1]))
+	user, err := context.Session.User(userId)
 
 	if err != nil {
 		_, err = context.Session.ChannelMessageSend(context.Channel.ID, "Invalid user, dufus!")
@@ -56,7 +50,5 @@ func InfoCommand(context *framework.Context) error {
 		Fields: fields,
 	}
 
-	_, err = context.Session.ChannelMessageSendEmbed(context.Channel.ID, &embed)
-
-	return err
+	return context.ReplyFromEmbed(&embed)
 }

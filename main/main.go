@@ -6,11 +6,10 @@ import (
 	"log"
 	"os"
 	"os/signal"
-	"strings"
 	"syscall"
 
-	"github.com/matthewlowe/RoboJoshGo/commands"
-	"github.com/matthewlowe/RoboJoshGo/framework"
+	"github.com/matthew-lowe/RoboJoshGo/commands"
+	"github.com/matthew-lowe/RoboJoshGo/framework"
 
 	"github.com/bwmarrin/discordgo"
 )
@@ -46,7 +45,8 @@ func main() {
 		log.Fatal(err)
 	}
 
-	dg, err := discordgo.New("Bot " + token)
+	session, err := discordgo.New("Bot " + token)
+	defer session.Close()
 
 	if err != nil {
 		log.Fatal(err)
@@ -54,13 +54,15 @@ func main() {
 
 	CmdRegistry = framework.NewCommandHandler()
 
-	registerCommands()
+	session.AddHandlerOnce(func(session *discordgo.Session, event *discordgo.Ready) {
+		registerCommands(session)
+	})
 
-	dg.AddHandler(messageCreate)
+	session.AddHandler(interactionCreate)
 
-	dg.Identify.Intents = discordgo.IntentsGuildMessages
+	session.Identify.Intents = discordgo.IntentsGuildMessages
 
-	err = dg.Open()
+	err = session.Open()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -69,24 +71,10 @@ func main() {
 	sc := make(chan os.Signal, 1)
 	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)
 	<-sc
-
-	_ = dg.Close() // We literally do not care if there's an error here, the program is closing anyway
 }
 
-func messageCreate(session *discordgo.Session, event *discordgo.MessageCreate) {
-	switch {
-	case event.Author.ID == session.State.User.ID:
-		return
-	case len(event.Content) < 2:
-		return
-	case event.Content[:len(Prefix)] != Prefix:
-		return
-	}
-
-	args := strings.Fields(event.Content[len(Prefix):])
-	name := args[0]
-
-	user := event.Author
+func interactionCreate(session *discordgo.Session, event *discordgo.InteractionCreate) {
+	user := event.User
 
 	channel, err := session.Channel(event.ChannelID)
 	if err != nil {
@@ -99,35 +87,24 @@ func messageCreate(session *discordgo.Session, event *discordgo.MessageCreate) {
 	}
 
 	context := framework.Context{
-		Session: session,
-		User:    user,
-		Channel: channel,
-		Guild:   guild,
-		Message: event.Message,
-		Args:    args,
-		Prefix:  Prefix,
-
-		CmdRegistry: CmdRegistry,
+		Session:     session,
+		User:        user,
+		Channel:     channel,
+		Guild:       guild,
+		Interaction: event,
 	}
 
-	command, found := CmdRegistry.Get(name)
-
-	if !found {
-		return
-	}
-
-	c := *command
-	err = c(&context)
+	name := event.ApplicationCommandData().Name
+	handler := commands.Handlers[name]
+	err = handler(&context)
 
 	if err != nil {
 		log.Println(err)
 	}
 }
 
-func registerCommands() {
-	CmdRegistry.Register("ping", "Test if the bot is working", Prefix+"ping", commands.PingCommand)
-	CmdRegistry.Register("help", "View a list of commands", Prefix+"help", commands.HelpCommand)
-	CmdRegistry.Register("color", "Generate a solid image color", Prefix+"color <hex code>", commands.ColorCommand)
-	CmdRegistry.Register("8ball", "Magic 8 ball!", Prefix+"ball <question>", commands.EightBallCommand)
-	CmdRegistry.Register("info", "Get user info", Prefix+"info <user>", commands.InfoCommand)
+func registerCommands(session *discordgo.Session) {
+	for _, v := range commands.Commands {
+		CmdRegistry.Register(v, session)
+	}
 }

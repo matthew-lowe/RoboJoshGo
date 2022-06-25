@@ -1,8 +1,7 @@
 package commands
 
 import (
-	"github.com/bwmarrin/discordgo"
-	"github.com/matthewlowe/RoboJoshGo/framework"
+	"github.com/matthew-lowe/RoboJoshGo/framework"
 )
 
 const (
@@ -12,34 +11,37 @@ const (
 )
 
 func ColorCommand(context *framework.Context) error {
-	code := context.Args[1]
+	/*
+		code := "#FFFFFF" //context.Args[1]
 
-	valid, err := framework.VerifyHexColor(code)
+		valid, err := framework.VerifyHexColor(code)
 
-	if err != nil {
-		return err
-	}
-
-	if !valid {
-		field := discordgo.MessageEmbedField{
-			Name:  "You fucking idiot",
-			Value: "Invalid color code provided! Must be in form #<code> where <code> is 6 hexadecimal digits",
+		if err != nil {
+			return err
 		}
 
-		return context.ReplyRichEmbed("Invalid hex code", "", []*discordgo.MessageEmbedField{&field})
-	}
+		if !valid {
+			field := discordgo.MessageEmbedField{
+				Name:  "You fucking idiot",
+				Value: "Invalid color code provided! Must be in form #<code> where <code> is 6 hexadecimal digits",
+			}
 
-	if code[0] == '#' {
-		code = code[1:]
-	}
+			return context.ReplyRichEmbed("Invalid hex code", "", []*discordgo.MessageEmbedField{&field})
+		}
 
-	url := baseUrl + code + "/" + width + "x" + height
+		if code[0] == '#' {
+			code = code[1:]
+		}
 
-	image := discordgo.MessageEmbedImage{
-		URL:    url,
-		Width:  500,
-		Height: 500,
-	}
+		url := baseUrl + code + "/" + width + "x" + height
 
-	return context.ReplyImageEmbed("#"+code, "Requested by "+context.User.Username+"#"+context.User.Discriminator, &image)
+		image := discordgo.MessageEmbedImage{
+			URL:    url,
+			Width:  500,
+			Height: 500,
+		}
+
+		return context.Reply("sadge") //ReplyImageEmbed("#"+code, "Requested by "+context.User.Username+"#"+context.User.Discriminator, &image)
+	*/
+	return context.Reply("sadge")
 }

@@ -1,36 +1,34 @@
 package framework
 
+import "github.com/bwmarrin/discordgo"
+
 type (
-	Command func(ctx *Context) error
+	CommandHandler func(ctx *Context) error
 
-	CommandStruct struct {
-		Command Command
-		Help    string
-		Usage   string
-	}
-
-	CommandMap map[string]CommandStruct
+	CommandMap map[string]*discordgo.ApplicationCommand
 
 	CommandRegistry struct {
 		commands CommandMap
 	}
 )
 
-func (handler *CommandRegistry) Register(name, help, usage string, command Command) {
-	commandStruct := CommandStruct{
-		Command: command,
-		Help:    help,
-		Usage:   usage,
+func (handler *CommandRegistry) Register(command *discordgo.ApplicationCommand, session *discordgo.Session) error {
+	newCommand, err := session.ApplicationCommandCreate(session.State.User.ID, "", command)
+
+	if err != nil {
+		return err
 	}
 
-	handler.commands[name] = commandStruct
+	handler.commands[command.Name] = newCommand
+
+	return nil
 }
 
-func (handler *CommandRegistry) Get(name string) (*Command, bool) {
+func (handler *CommandRegistry) Get(name string) (*discordgo.ApplicationCommand, bool) {
 	command, ok := handler.commands[name]
 
 	if ok {
-		return &command.Command, true
+		return command, true
 	} else {
 		return nil, false
 	}

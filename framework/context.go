@@ -5,21 +5,22 @@ import (
 )
 
 type Context struct {
-	Session *discordgo.Session
-	User    *discordgo.User
-	Channel *discordgo.Channel
-	Guild   *discordgo.Guild
-	Message *discordgo.Message
-	Args    []string
-	Prefix  string
-
-	CmdRegistry *CommandRegistry
+	Session     *discordgo.Session
+	User        *discordgo.User
+	Channel     *discordgo.Channel
+	Guild       *discordgo.Guild
+	Interaction *discordgo.InteractionCreate
 }
 
-func (context *Context) Reply(message string) (*discordgo.Message, error) {
-	msg, err := context.Session.ChannelMessageSend(context.Channel.ID, context.User.Mention()+" "+message)
+func (context *Context) Reply(message string) error {
+	err := context.Session.InteractionRespond(context.Interaction.Interaction, &discordgo.InteractionResponse{
+		Type: discordgo.InteractionResponseChannelMessageWithSource,
+		Data: &discordgo.InteractionResponseData{
+			Content: "slash commands poggers verified",
+		},
+	})
 
-	return msg, err
+	return err
 }
 
 func (context *Context) ReplyRichEmbed(title, description string, fields []*discordgo.MessageEmbedField) error {
@@ -35,7 +36,12 @@ func (context *Context) ReplyRichEmbed(title, description string, fields []*disc
 		},
 	}
 
-	_, err := context.Session.ChannelMessageSendEmbed(context.Channel.ID, &embed)
+	err := context.Session.InteractionRespond(context.Interaction.Interaction, &discordgo.InteractionResponse{
+		Type: discordgo.InteractionResponseChannelMessageWithSource,
+		Data: &discordgo.InteractionResponseData{
+			Embeds: []*discordgo.MessageEmbed{&embed},
+		},
+	})
 
 	return err
 }
@@ -53,7 +59,23 @@ func (context *Context) ReplyImageEmbed(title, description string, image *discor
 		Image: image,
 	}
 
-	_, err := context.Session.ChannelMessageSendEmbed(context.Channel.ID, &embed)
+	err := context.Session.InteractionRespond(context.Interaction.Interaction, &discordgo.InteractionResponse{
+		Type: discordgo.InteractionResponseChannelMessageWithSource,
+		Data: &discordgo.InteractionResponseData{
+			Embeds: []*discordgo.MessageEmbed{&embed},
+		},
+	})
+
+	return err
+}
+
+func (context *Context) ReplyFromEmbed(embed *discordgo.MessageEmbed) error {
+	err := context.Session.InteractionRespond(context.Interaction.Interaction, &discordgo.InteractionResponse{
+		Type: discordgo.InteractionResponseChannelMessageWithSource,
+		Data: &discordgo.InteractionResponseData{
+			Embeds: []*discordgo.MessageEmbed{embed},
+		},
+	})
 
 	return err
 }

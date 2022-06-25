@@ -1,8 +1,9 @@
 package commands
 
 import (
-	"github.com/matthewlowe/RoboJoshGo/framework"
 	"math/rand"
+
+	"github.com/matthew-lowe/RoboJoshGo/framework"
 )
 
 var (
@@ -23,7 +24,7 @@ func getRandomResponse() string {
 }
 
 func EightBallCommand(context *framework.Context) error {
-	_, err := context.Reply(getRandomResponse())
+	err := context.Reply(getRandomResponse())
 
 	return err
 }

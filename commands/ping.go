@@ -1,11 +1,11 @@
 package commands
 
 import (
-	"github.com/matthewlowe/RoboJoshGo/framework"
+	"github.com/matthew-lowe/RoboJoshGo/framework"
 )
 
 func PingCommand(context *framework.Context) error {
-	_, err := context.Reply("Pong!")
+	err := context.Reply("Pong!")
 
 	return err
 }
